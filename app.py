@@ -158,19 +158,22 @@ st.subheader("📸 Upload an Image to Identify Activity")
 uploaded_image = st.file_uploader("Choose an image", type=["jpg", "jpeg", "png"])
 
 if uploaded_image is not None:
-    image_obj = Image.open(uploaded_image)
-    st.image(image_obj, caption="Uploaded Image", use_column_width=True)
+    # Open and resize the image to a smaller dimension (128x128 for consistency with model)
+    image_obj = Image.open(uploaded_image).convert("RGB")
+    image_obj = image_obj.resize((128, 128))
 
-    # Save temporarily
+    # Display resized image
+    st.image(image_obj, caption="🖼️ Resized Image Preview (128x128)", use_column_width=False)
+
+    # Save resized image temporarily with reduced quality to reduce size
     temp_path = "temp_image.jpg"
-    with open(temp_path, "wb") as f:
-        f.write(uploaded_image.getbuffer())
+    image_obj.save(temp_path, format="JPEG", quality=80, optimize=True)
 
     # Predict activity
     predicted_activity = classify_image(temp_path)
     st.success(f"🏷 Predicted Activity: {predicted_activity}")
 
-    # Cleanup (optional)
+    # Cleanup
     os.remove(temp_path)
 
 st.write("🚀 *Use this dashboard to track and analyze your activity performance!*")
